@@ -1,2 +1,2 @@
 # FPGA-ML
-C-like language synthesis to Verilog to test various machine learning models in an FPGA.
+Neural Networks written in C++ which can be synthesized to HDL and executed in an FPGA.
