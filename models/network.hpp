@@ -2,7 +2,6 @@
 #include <iostream>
 #include <math.h>
 
-
 using namespace std;
 
 #define LAYERS 3
@@ -14,31 +13,33 @@ static double f_rand(double f_min, double f_max) {
     return f_min + f * (f_max - f_min);
 }
 
-static double sigmoid(double z) {
+double sigmoid(double z) {
     return 1.0 / (1.0+exp(-z));
 }
 
-static double sigmoid_prime(double z) {
+double sigmoid_prime(double z) {
     return sigmoid(z)*(1-sigmoid(z));
 }
 
-static void sigmoid_vector(double *vec, size_t size, double *result) {
+void sigmoid_vector(double *vec, size_t size, double *result) {
     for(int i=0; i < size; ++i) {
         result[i] = sigmoid(vec[i]);
     }
 }
 
-static void sigmoid_prime_vector(double *vec, size_t size, double *result) {
+void sigmoid_prime_vector(double *vec, size_t size, double *result) {
     for(int i=0; i < size; ++i) {
         result[i] = sigmoid_prime(vec[i]);
     }
 } 
-/*
-static double *dot_product(double *a, double *b) {
-    // TODO
-    double res[2] = {0.0, 0.0};
-    return res;
-}*/
+
+double dot_product(double *a, double *b, size_t size) {
+    double result = 0.0;
+    for(int i=0; i < size; ++i) {
+        result += a[i] * b[i]; 
+    }
+    return result;
+}
 
 
 class Network {
@@ -52,22 +53,22 @@ class Network {
             init_biases();
         }
 
-        /*double feedforward(double *input) {
+        double *feedforward(double *a) {
             for(int i=0; i < LAYERS; ++i) {
                 double *b = biases[i];
                 double *w = weights[i];
                 double res[SIZES[i]];
+                // TODO: size of these vectors?
+                double dp = dot_product(w, a, SIZES[i+1]); 
 
-                double dot_product = dot_product(w, input);
-
-                for(int j=0; j < SIZES[i + 1]; ++j) { 
-                    res[j] = dot_product + b[j];
+                for(int j=0; j < SIZES[i+1]; ++j) { 
+                    res[j] = dp + b[j];
                 }
-
-                input = sigmoid(res);
+                // TODO: Size is probably wrong
+                sigmoid_vector(res, SIZES[i], a);
             }
-            return input;
-        }*/
+            return a;
+        }
 
         void show() {
             cout << "Weights: " << endl;
