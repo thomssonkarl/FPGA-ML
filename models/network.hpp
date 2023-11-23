@@ -41,7 +41,6 @@ double dot_product(double *a, double *b, size_t size) {
     return result;
 }
 
-
 class Network {
 
     public:
