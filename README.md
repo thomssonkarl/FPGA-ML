@@ -10,13 +10,6 @@ This project is currently a work in progress.
 
 FPGA-ML aims to implement some simple Neural Networks in C++ with the ability to synthesize the code to Hardware Description Language (HDL) and run it on Field-Programmable Gate Arrays (FPGAs).
 
-## Getting Started
-
-Makefile is provided in the `models` directory. 
-
-To compile the basic NN implementation, run `make` from this directory. 
-
-Run the NN: `./network`
 
 
 
