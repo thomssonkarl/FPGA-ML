@@ -1,6 +1,6 @@
 # FPGA-ML
 
-Neural Networks implemented in C++ for synthesis to HDL and execution on an FPGA.
+Neural Networks implemented in C for synthesis to HDL and execution on an FPGA.
 
 ## Work in Progress
 
