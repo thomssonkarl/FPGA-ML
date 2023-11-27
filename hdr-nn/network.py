@@ -181,12 +181,15 @@ class Network(object):
 
 
     def dumpBias(self):
+        a ='{'
+        b='}'
         with open("biases.h", "w") as f:
-            f.write("double *biases[2] = {\n")
+            f.write("double **biases[2] = {\n")
             for bias_array in self.biases:
-                f.write("    (double[]) {\n")
+                f.write(f"    (double*[{len(bias_array)}]) {'{'}")
+                f.write("\n")
                 for value in bias_array:
-                    f.write(f"        {value[0]},\n")
+                    f.write(f"(double[1])        {a+str(value[0])+b},\n")
                 f.write("    },\n")
             f.write("};\n")
 
