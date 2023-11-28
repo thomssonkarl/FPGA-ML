@@ -62,7 +62,7 @@ void FlipLong(unsigned char * ptr)
 
 void read_mnist_char(char *file_path, int num_data, int len_info, int arr_n, unsigned char data_char[][arr_n], int info_arr[])
 {
-    int i, j, k, fd;
+    int i, fd;
     unsigned char *ptr;
 
     if ((fd = open(file_path, O_RDONLY)) == -1) {
@@ -135,7 +135,7 @@ void print_mnist_pixel(double data_image[][SIZE], int num_data)
 }
 
 
-void print_mnist_label(int data_label[], int num_data)
+void print_mnist_label(int num_data)
 {
     int i;
     if (num_data == NUM_TRAIN)
