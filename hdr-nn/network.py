@@ -50,8 +50,6 @@ class Network(object):
     def feedforward(self, a):
         """Return the output of the network if ``a`` is input."""
         for b, w in zip(self.biases, self.weights):
-            test1 = np.dot(w, a)
-            print(np.shape(test1))
             a = sigmoid(np.dot(w, a)+b)
         return a
 

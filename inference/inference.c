@@ -15,7 +15,7 @@ double sigmoid_single(double z) {
 }
 
 
-void sigmoid(double vec[][LAYER_1_HEIGHT], double res[][INPUT_SIZE], int height) {
+void sigmoid(double vec[LAYER_1_HEIGHT][1], double res[LAYER_1_HEIGHT][INPUT_SIZE], int height) {
 	for(int i=0; i < BIAS_WIDTH; i++) {
 		for(int j=0; j < height; j++) {
 			double sig = sigmoid_single(vec[i][j]);
@@ -107,16 +107,25 @@ int feed_forward(double *input) {
 }
 
 
+void evaluate() {
+	int actual, output, counter = 0;
+	double *input;
+	for (int i = 0; i < 10000; i++) {
+		actual = test_label[i];
+    	input = test_image[i];
+    	output = feed_forward(input);
+		if (output == actual) {
+			counter++;
+		}
+	}
+	printf("Output: %d/10000\n", counter);
+}
+
 int main() {
 
     load_mnist();
-    int actual = test_label[34];
-    double *input = test_image[34];
-
-    int output = feed_forward(input);
-
-    printf("Output from NN: %d\n", output);
-    printf("Actual: %d\n", actual);
+	
+	evaluate();
 
     return 0;
 }
