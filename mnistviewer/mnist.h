@@ -202,6 +202,11 @@ int double_to_fixed(double x) {
     return (int) (x * scale_factor);
 }
 
+double fixed_to_double(int x) {
+    double scale_factor = 10000.0;
+    return (double) (x / scale_factor);
+}
+
 void images_to_fixed(double images[10000][784], int images_write[10000][784]) {
     for (int image_no = 0; image_no < 10000; image_no++) {
         for (int pixel = 0; pixel < 784; pixel++) {

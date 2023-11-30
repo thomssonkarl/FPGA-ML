@@ -1,5 +1,5 @@
 #include "../mnistviewer/mnist.h"
-#include "parameters.h"
+#include "parameters_double.h"
 #include <math.h>
 
 #define INPUT_SIZE 784
@@ -165,12 +165,7 @@ int main() {
     
     images_to_fixed(test_image, test_image_fixed);
 
-    for (int i = 0; i < 784; i++) {
-        printf("%d, ", test_image_fixed[0][i]);
-        if (i % 28 == 0) printf("\n");    
-    }
-
-	//evaluate();
+	evaluate();
 	//evaluate_display();
 
     return 0;
