@@ -162,9 +162,16 @@ void evaluate_display() {
 int main() {
 
     load_mnist();
-	
-	evaluate();
-	evaluate_display();
+    
+    images_to_fixed(test_image, test_image_fixed);
+
+    for (int i = 0; i < 784; i++) {
+        printf("%d, ", test_image_fixed[0][i]);
+        if (i % 28 == 0) printf("\n");    
+    }
+
+	//evaluate();
+	//evaluate_display();
 
     return 0;
 }

@@ -166,14 +166,14 @@ class Network(object):
 
     def dumpWeight(self):
         with open("weights.h", "w") as f:
-            f.write("double **weights[2] = {\n")
+            f.write("int **weights[2] = {\n")
             for weight_matrix in self.weights:
-                f.write(f"(double*[{len(weight_matrix)}])    {'{'}")
+                f.write(f"(int *[{len(weight_matrix)}])    {'{'}")
                 f.write("\n")
                 for row in weight_matrix:
-                    f.write(f"(double[{len(row)}])        {'{'}")
+                    f.write(f"(int [{len(row)}])        {'{'}")
                     for value in row:
-                        f.write(f" {value},")
+                        f.write(f" {double_to_fixed(value)},")
                     f.write(" },\n")
                 f.write("    },\n")
             f.write("};\n")
@@ -184,12 +184,12 @@ class Network(object):
         a ='{'
         b='}'
         with open("biases.h", "w") as f:
-            f.write("double **biases[2] = {\n")
+            f.write("int **biases[2] = {\n")
             for bias_array in self.biases:
-                f.write(f"    (double*[{len(bias_array)}]) {'{'}")
+                f.write(f"    (int *[{len(bias_array)}]) {'{'}")
                 f.write("\n")
                 for value in bias_array:
-                    f.write(f"(double[1])        {a+str(value[0])+b},\n")
+                    f.write(f"(int [1])        {a+str(double_to_fixed(value[0]))+b},\n")
                 f.write("    },\n")
             f.write("};\n")
 
@@ -203,3 +203,6 @@ def sigmoid(z):
 def sigmoid_prime(z):
     """Derivative of the sigmoid function."""
     return sigmoid(z)*(1-sigmoid(z))
+
+def double_to_fixed(x):
+    return int(x * 10000)

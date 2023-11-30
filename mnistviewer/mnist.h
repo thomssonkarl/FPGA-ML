@@ -39,6 +39,8 @@ unsigned char test_label_char[NUM_TEST][1];
 
 double train_image[NUM_TRAIN][SIZE];
 double test_image[NUM_TEST][SIZE];
+int test_image_fixed[NUM_TEST][SIZE];
+
 int  train_label[NUM_TRAIN];
 int test_label[NUM_TEST];
 
@@ -193,4 +195,17 @@ void save_mnist_pgm(double data_image[][SIZE], int index)
     }
 
     save_image(n, "");
+}
+
+int double_to_fixed(double x) {
+    double scale_factor = 10000.0;
+    return (int) (x * scale_factor);
+}
+
+void images_to_fixed(double images[10000][784], int images_write[10000][784]) {
+    for (int image_no = 0; image_no < 10000; image_no++) {
+        for (int pixel = 0; pixel < 784; pixel++) {
+            images_write[image_no][pixel] = double_to_fixed(images[image_no][pixel]);
+        }
+    }
 }

@@ -35,11 +35,11 @@ import pudb
 net = network.Network([784, 30, 10])
 net.SGD(training_data, 30, 10, 3, test_data=test_data)
 
-#net.dumpWeight()
-#net.dumpBias()
+net.dumpWeight()
+net.dumpBias()
 
 #pu.db
-net.evaluate(training_data)
+#net.evaluate(training_data)
 
 # ---------------------
 # - network2.py example:
