@@ -178,6 +178,24 @@ class Network(object):
                 f.write("    },\n")
             f.write("};\n")
 
+    def dumpWeightSplit(self):
+        with open("weights_split.h", "w") as f:
+            f.write("uint16_t weights_hl[30][784] = {\n")
+            for weight_matrix in self.weights[0]:
+                f.write(f"        {'{'}")
+                for value in weight_matrix:
+                    f.write(f" {int_representation(fp64d_to_fp16b(value))},")
+                f.write(" },\n")
+            f.write("};\n")
+
+            f.write("uint16_t weights_ol[10][30] = {\n")
+            for weight_matrix in self.weights[1]:
+                f.write(f"        {'{'}")
+                for value in weight_matrix:
+                    f.write(f" {int_representation(fp64d_to_fp16b(value))},")
+                f.write(" },\n")
+            f.write("};\n")
+
 
 
     def dumpBias(self):
@@ -193,6 +211,25 @@ class Network(object):
                 f.write("    },\n")
             f.write("};\n")
 
+    def dumpBiasSplit(self):
+        a ='{'
+        b='}'
+        with open("biases_split.h", "w") as f:
+            f.write("uint16_t biases_hl[30][1] = {\n")
+            for bias_array in self.biases[0]:
+                for value in bias_array:
+                    print(value)
+                    f.write(f"        {a+str(int_representation(fp64d_to_fp16b(value)))+b},\n")
+            f.write("};\n")
+
+            f.write("uint16_t biases_ol[10][1] = {\n")
+            for bias_array in self.biases[1]:
+                for value in bias_array:
+                    print(value)
+                    f.write(f"        {a+str(int_representation(fp64d_to_fp16b(value)))+b},\n")
+            f.write("};\n")
+
+
 
 
 #### Miscellaneous functions
@@ -204,5 +241,16 @@ def sigmoid_prime(z):
     """Derivative of the sigmoid function."""
     return sigmoid(z)*(1-sigmoid(z))
 
+def fp64d_to_fp16b(a):
+    return bin(np.float16(a).view('H'))[2:].zfill(16)
+
+def int_representation(__a):
+    return int(__a, 2)
+
+def fp16b_to_fp64d(__a):
+    binary_str = format(__a, '016b')  # Ensure 16 bits in the binary representation
+    float16_view = np.uint16(int(binary_str, 2)).view(np.float16)
+    return float16_view.item()
+
 def double_to_fixed(x):
-    return int(x * 10000)
+        return int(x * 10000)

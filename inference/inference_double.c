@@ -35,14 +35,17 @@ void dot_product(double **weights, double *image, double res_vec[][1], int heigh
 	}
 	for (int i = 0; i < height; i++) {
 		for (int j = 0; j < size; j++) {
+			printf("Using w = %f, img = %f\n", weights[i][j], image[i]);
 			result += weights[i][j] * image[j]; 
 		}
 		res_vec[i][0] = result;
+		printf("DP: %f\n", res_vec[i][0]);	
 		result = 0.0;
 	}
 }
 
 void vector_add(double a[LAYER_1_HEIGHT][1], double **b, double add_res[LAYER_1_HEIGHT][1], int height) {
+	printf("Bias in add: %f\n", b[0][0]);
 	for (int j = 0; j < height; j++) {
 		add_res[j][0] = b[j][0] + a[j][0];
 	}
@@ -117,6 +120,7 @@ void evaluate() {
 		if (output == actual) {
 			counter++;
 		}
+		return;
 	}
 	printf("Accuracy: %d/10000\n", counter);
 }
@@ -162,11 +166,8 @@ void evaluate_display() {
 int main() {
 
     load_mnist();
-    
-    images_to_fixed(test_image, test_image_fixed);
-
+	
 	evaluate();
-	//evaluate_display();
 
     return 0;
 }

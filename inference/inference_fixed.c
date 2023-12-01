@@ -1,5 +1,8 @@
 #include "../mnistviewer/mnist.h"
-#include "parameters_fixed.h"
+#include <stdint.h>
+#include <string.h>
+//#include "parameters_fixed.h"
+#include "parameters_split_fixed.h"
 #include <math.h>
 
 
@@ -18,12 +21,14 @@ void sigmoid(int vec[30], int result[30], int height) {
 
 void dot_product(int weights[30][784], int image[784], int result[30], int height, int size) {
 	int dp = 0;
-
+	//printf("Using height = %d, size = %d\n", height, size);
 	for (int i = 0; i < height; i++) {
 		for (int j = 0; j < size; j++) {
+			//printf("Using w = %d, img = %d\n", weights[i][j], image[i]);
 			dp += weights[i][j] * image[j]; 
 		}
 		result[i] = dp;
+		//printf("DP: %d\n", result[i]);	
 		dp = 0;
 	}
 }
@@ -52,23 +57,20 @@ int argmax(const int arr[], int size) {
 	return max_index;
 }
 
-int feed_forward(int *input) {
-	int res[784] = {0};
+int feed_forward(int input[784]) {
+	int res[30] = {0};
 	int add_res[30] = {0};
 	int dp_res[30] = {0};
-
+	printf("Hidden layer: \n");	
 	// Hidden layer (height is 30)
 	const int height_hl = 30;
-	int **biases_hl = biases[0];
-	int **weights_hl = weights[0];
 	dot_product(weights_hl, input, dp_res, height_hl, 784);
 	vector_add(dp_res, biases_hl, add_res, height_hl);
 	sigmoid(add_res, res, height_hl);
 
 	// Output layer (height is 10)
+	printf("Output layer: \n");	
 	const int height_ol = 10;
-	int **biases_ol = biases[1];
-	int **weights_ol = weights[1];
 	dot_product(weights_ol, input, dp_res, height_ol, 30);
 	vector_add(dp_res, biases_ol, add_res, height_ol);
 	sigmoid(add_res, res, height_ol);
@@ -87,8 +89,9 @@ void evaluate() {
 		if (output == actual) {
 			counter++;
 		}
+		return; // Debug only use 1 image
 	}
-	printf("Accuracy: %d/10000\n", counter);
+	//printf("Accuracy: %d/10000\n", counter);
 }
 
 
@@ -129,6 +132,39 @@ void evaluate_display() {
 	}
 }*/
 
+
+double fp16b_to_fp64d(uint16_t a) {
+
+	uint16_t sign = (a >> 15) & 0x01;
+	uint16_t exponent = (a >> 10) & 0x1F;
+	uint16_t fraction = a & 0x03FF;
+
+	int32_t biased_exponent = exponent - 15 + 1023;
+	uint64_t result = ((uint64_t)sign << 63) | ((uint64_t)biased_exponent << 52) | ((uint64_t)fraction << 42);
+
+	double final_result;
+	memcpy(&final_result, &result, sizeof(double));
+
+	return final_result;
+
+}
+
+
+int fp64d_to_fp16b(double a) {
+	uint64_t value;
+	memcpy(&value, &a, sizeof(double));
+
+	uint16_t sign = (value >> 63) & 0x01;
+	uint16_t biased_exponent = (value >> 52) & 0x7FF;
+	uint16_t fraction = (value >> 42) & 0x03FF;
+
+	uint16_t exponent = (biased_exponent - 1023 + 15) & 0x1F;
+
+	int result = (sign << 15) | (exponent << 10) | fraction;
+	return result;
+
+}
+
 int main() {
 
     load_mnist();
@@ -136,6 +172,11 @@ int main() {
     images_to_fixed(test_image, test_image_fixed);
 
 	evaluate();
-
+	uint16_t test_val = 18989;
+	printf("Using: %d\n", test_val);
+	double x = fp16b_to_fp64d(test_val);
+	printf("%f\n", x);
+	uint16_t int_rep = fp64d_to_fp16b(x);
+	printf("%d\n", int_rep);
     return 0;
 }
