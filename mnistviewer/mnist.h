@@ -8,6 +8,7 @@ https://github.com/takafumihoriuchi/MNIST_for_C
 #include <unistd.h>
 #include <fcntl.h>
 #include <string.h>
+#include <stdint.h>
 
 // set appropriate path for data
 #define TRAIN_IMAGE "./data/train-images.idx3-ubyte"
@@ -39,7 +40,7 @@ unsigned char test_label_char[NUM_TEST][1];
 
 double train_image[NUM_TRAIN][SIZE];
 double test_image[NUM_TEST][SIZE];
-int test_image_fixed[NUM_TEST][SIZE];
+uint16_t test_image_fixed[NUM_TEST][SIZE];
 
 int  train_label[NUM_TRAIN];
 int test_label[NUM_TEST];
@@ -240,10 +241,10 @@ uint16_t fp64d_to_fp16b(double a) {
 
 
 
-void images_to_fixed(double images[10000][784], int images_write[10000][784]) {
+void images_to_fixed(double images[10000][784], uint16_t images_write[10000][784]) {
     for (int image_no = 0; image_no < 10000; image_no++) {
         for (int pixel = 0; pixel < 784; pixel++) {
-            images_write[image_no][pixel] = double_to_fixed(images[image_no][pixel]);
+            images_write[image_no][pixel] = fp64d_to_fp16b(images[image_no][pixel]);
         }
     }
 }

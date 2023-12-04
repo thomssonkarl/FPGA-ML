@@ -6,49 +6,53 @@
 #include <math.h>
 
 
-int sigmoid_single(int z) {
-	double z_as_double = fixed_to_double(z);
+uint16_t sigmoid_single(uint16_t z) {
+	double z_as_double = fp16b_to_fp64d(z);
 	double sigmoid = 1.0 / (1.0 + exp(-z_as_double));
-	return double_to_fixed(sigmoid);	
+	return fp64d_to_fp16b(sigmoid);	
 }
 
 
-void sigmoid(int vec[30], int result[30], int height) {
-	for(int i=0; i < height; i++) {
+void sigmoid(uint16_t vec[30], uint16_t result[30], uint16_t height) {
+	for(uint16_t i=0; i < height; i++) {
 		 result[i] = sigmoid_single(vec[i]);
 	}
 }
 
-void dot_product(int weights[30][784], int image[784], int result[30], int height, int size) {
-	int dp = 0;
+void dot_product(uint16_t weights[30][784], uint16_t image[784], uint16_t result[30], uint16_t height, uint16_t size) {
+	uint16_t dp = 0;
 	//printf("Using height = %d, size = %d\n", height, size);
-	for (int i = 0; i < height; i++) {
-		for (int j = 0; j < size; j++) {
+	for (uint16_t i = 0; i < height; i++) {
+		for (uint16_t j = 0; j < size; j++) {
 			//printf("Using w = %d, img = %d\n", weights[i][j], image[i]);
+            printf("weight %d\n", weights[i][j]);
+            printf("input %d\n", image[j]);
 			dp += weights[i][j] * image[j]; 
 		}
 		result[i] = dp;
-		//printf("DP: %d\n", result[i]);	
+		printf("DP: %d\n", result[i]);	
 		dp = 0;
 	}
 }
 
-void vector_add(int a[30], int b[30][1], int result[30], int height) {
-	for (int i = 0; i < height; i++) {
+void vector_add(uint16_t a[30], uint16_t b[30][1], uint16_t result[30], uint16_t height) {
+    printf("add\n");
+    for (uint16_t i = 0; i < height; i++) {
 		result[i] = b[i][0] + a[i];
-	}
+	    printf("result %d = %d + %d\n", result[i], b[i][0], a[i]);
+    }
 }
 
 
-int argmax(const int arr[], int size) {
+uint16_t argmax(const uint16_t arr[], uint16_t size) {
 	if (size <= 0) {
 		fprintf(stderr, "Error: Invalid array size\n");
 		return -1;
 	}
 
-	int max_index = 0;
-	int max_value = arr[0];
-	for (int i = 1; i < size; i++) {
+	uint16_t max_index = 0;
+	uint16_t max_value = arr[0];
+	for (uint16_t i = 1; i < size; i++) {
 		if (arr[i] > max_value) {
 			max_value = arr[i];
 			max_index = i;
@@ -57,41 +61,46 @@ int argmax(const int arr[], int size) {
 	return max_index;
 }
 
-int feed_forward(int input[784]) {
-	int res[30] = {0};
-	int add_res[30] = {0};
-	int dp_res[30] = {0};
-	printf("Hidden layer: \n");	
+uint16_t feed_forward(uint16_t input[784]) {
+	uint16_t res[30] = {0};
+	uint16_t add_res[30] = {0};
+	uint16_t dp_res[30] = {0};
+	//printf("Hidden layer: \n");	
 	// Hidden layer (height is 30)
-	const int height_hl = 30;
+	const uint16_t height_hl = 30;
 	dot_product(weights_hl, input, dp_res, height_hl, 784);
 	vector_add(dp_res, biases_hl, add_res, height_hl);
 	sigmoid(add_res, res, height_hl);
 
 	// Output layer (height is 10)
-	printf("Output layer: \n");	
-	const int height_ol = 10;
+	//printf("Output layer: \n");	
+	const uint16_t height_ol = 10;
 	dot_product(weights_ol, input, dp_res, height_ol, 30);
 	vector_add(dp_res, biases_ol, add_res, height_ol);
 	sigmoid(add_res, res, height_ol);
 
+    printf("[");
+    for (int i = 0; i < 10; i++) {
+        printf("%d, ", res[i]);
+    }
+    printf("]\n");
 	
-	int output = argmax(res, height_ol);
+	uint16_t output = argmax(res, height_ol);
 	return output;
 }
 
 
 void evaluate() {
-	int actual, output, counter = 0;
-	for (int i = 0; i < 10000; i++) {
+	uint16_t actual, output, counter = 0;
+	for (uint16_t i = 0; i < 10000; i++) {
 		actual = test_label[i];
     	output = feed_forward(test_image_fixed[i]);
-		if (output == actual) {
+        if (output == actual) {
 			counter++;
 		}
 		return; // Debug only use 1 image
 	}
-	//printf("Accuracy: %d/10000\n", counter);
+	printf("Accuracy: %d/10000\n", counter);
 }
 
 
@@ -132,44 +141,13 @@ void evaluate_display() {
 	}
 }*/
 
-
-double fp16b_to_fp64d(uint16_t a) {
-
-	uint16_t sign = (a >> 15) & 0x01;
-	uint16_t exponent = (a >> 10) & 0x1F;
-	uint16_t fraction = a & 0x03FF;
-
-	int32_t biased_exponent = exponent - 15 + 1023;
-	uint64_t result = ((uint64_t)sign << 63) | ((uint64_t)biased_exponent << 52) | ((uint64_t)fraction << 42);
-
-	double final_result;
-	memcpy(&final_result, &result, sizeof(double));
-
-	return final_result;
-
-}
-
-
-int fp64d_to_fp16b(double a) {
-	uint64_t value;
-	memcpy(&value, &a, sizeof(double));
-
-	uint16_t sign = (value >> 63) & 0x01;
-	uint16_t biased_exponent = (value >> 52) & 0x7FF;
-	uint16_t fraction = (value >> 42) & 0x03FF;
-
-	uint16_t exponent = (biased_exponent - 1023 + 15) & 0x1F;
-
-	int result = (sign << 15) | (exponent << 10) | fraction;
-	return result;
-
-}
-
 int main() {
 
     load_mnist();
     
     images_to_fixed(test_image, test_image_fixed);
+
+    display_image(test_image_fixed[0]);
 
 	evaluate();
 	uint16_t test_val = 18989;
