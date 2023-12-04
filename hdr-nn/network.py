@@ -197,6 +197,31 @@ class Network(object):
             f.write("};\n")
 
 
+    def dumpWeightSplit(self):
+        with open("weights_split.h", "w") as f:
+            f.write("uint16_t weights_hl[30][784] = {\n")
+            for weight_matrix in self.weights[0]:
+                f.write(f"        {'{'}")
+                for value in weight_matrix:
+                    f.write(f" {int_representation(fp64d_to_fp16b(value))},")
+                f.write(" },\n")
+            f.write("};\n")
+
+            weights_ol_dim = (30, 784)
+            f.write(f"uint16_t weights_ol[{weights_ol_dim[0]}][{weights_ol_dim[1]}] = {'{'}\n")
+            for weight_matrix in self.weights[1]:
+                f.write(f"        {'{'}")
+                for value in weight_matrix:
+                    f.write(f" {int_representation(fp64d_to_fp16b(value))},")
+                for _ in range(weights_ol_dim[1] - len(weight_matrix)):
+                    f.write(" 0,")
+                f.write(" },\n")
+            for _ in range(20):
+                f.write(f"        {'{' + ' 0,' * weights_ol_dim[1]}{'}'},\n")
+            f.write("};\n")
+
+
+
 
     def dumpBias(self):
         a ='{'

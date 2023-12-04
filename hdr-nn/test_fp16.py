@@ -11,7 +11,7 @@ def fp16b_to_fp64d(__a):
     float16_view = np.uint16(int(binary_str, 2)).view(np.float16)
     return float16_view.item()
 
-value_to_test = -12.35
+value_to_test = 0.5 
 
 int_rep = int_representation(fp64d_to_fp16b(value_to_test))
 

@@ -24,7 +24,7 @@ void dot_product(uint16_t weights[30][784], uint16_t image[784], uint16_t result
 	//printf("Using height = %d, size = %d\n", height, size);
 	for (uint16_t i = 0; i < height; i++) {
 		for (uint16_t j = 0; j < size; j++) {
-			//printf("Using w = %d, img = %d\n", weights[i][j], image[i]);
+			printf("Using w = %d, img = %d\n", weights[i][j], image[i]);
             printf("weight %d\n", weights[i][j]);
             printf("input %d\n", image[j]);
 			dp += weights[i][j] * image[j]; 
@@ -65,7 +65,7 @@ uint16_t feed_forward(uint16_t input[784]) {
 	uint16_t res[30] = {0};
 	uint16_t add_res[30] = {0};
 	uint16_t dp_res[30] = {0};
-	//printf("Hidden layer: \n");	
+	printf("Hidden layer: \n");	
 	// Hidden layer (height is 30)
 	const uint16_t height_hl = 30;
 	dot_product(weights_hl, input, dp_res, height_hl, 784);
@@ -73,7 +73,7 @@ uint16_t feed_forward(uint16_t input[784]) {
 	sigmoid(add_res, res, height_hl);
 
 	// Output layer (height is 10)
-	//printf("Output layer: \n");	
+	printf("Output layer: \n");	
 	const uint16_t height_ol = 10;
 	dot_product(weights_ol, input, dp_res, height_ol, 30);
 	vector_add(dp_res, biases_ol, add_res, height_ol);
@@ -98,13 +98,14 @@ void evaluate() {
         if (output == actual) {
 			counter++;
 		}
-		return; // Debug only use 1 image
+		if (i == 2) return;
 	}
 	printf("Accuracy: %d/10000\n", counter);
 }
 
 
 
+/*
 void print_colored_pixel(double value) {
 	int color_code = (int)(value * 255);
 	printf("\x1b[48;2;%d;%d;%dm  ", color_code, color_code, color_code);
@@ -118,7 +119,6 @@ void display_image(double *image) {
 		printf("\n");
 	}
 }
-/*
 void evaluate_display() {
 	int quit = 0;
 	int i = 0;
@@ -147,12 +147,14 @@ int main() {
     
     images_to_fixed(test_image, test_image_fixed);
 
-    display_image(test_image_fixed[0]);
+    //display_image(test_image_fixed[0]);
 
-	evaluate();
-	uint16_t test_val = 18989;
-	printf("Using: %d\n", test_val);
-	double x = fp16b_to_fp64d(test_val);
+	//evaluate();
+	uint16_t test_val = 18688;
+	uint16_t test_val2 = 18688; 
+	uint16_t res = test_val * test_val2;
+	printf("Using: %d\n", res);
+	double x = fp16b_to_fp64d(res);
 	printf("%f\n", x);
 	uint16_t int_rep = fp64d_to_fp16b(x);
 	printf("%d\n", int_rep);

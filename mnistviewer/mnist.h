@@ -209,7 +209,7 @@ double fixed_to_double(int x) {
 }
 
 
-double fp16b_to_fp64d(uint16_t a) {
+/*double fp16b_to_fp64d(uint16_t a) {
 
     uint16_t sign = (a >> 15) & 0x01;
     uint16_t exponent = (a >> 10) & 0x1F;
@@ -222,9 +222,26 @@ double fp16b_to_fp64d(uint16_t a) {
     memcpy(&final_result, &result, sizeof(double));
 
     return final_result;
+}*/
+
+double fp16b_to_fp64d(uint16_t a) {
+    uint16_t sign = (a >> 15) & 0x01;
+    uint16_t exponent = (a >> 10) & 0x1F;
+    uint16_t fraction = a & 0x03FF;
+
+    int32_t biased_exponent = exponent - 15 + 1023;
+    uint64_t result = ((uint64_t)sign << 63) | ((uint64_t)biased_exponent << 52) | ((uint64_t)fraction << 42);
+
+    double final_result;
+    memcpy(&final_result, &result, sizeof(double));
+
+    return final_result;
+
 }
 
 
+
+/*
 uint16_t fp64d_to_fp16b(double a) {
     uint64_t value;
     memcpy(&value, &a, sizeof(double));
@@ -237,6 +254,22 @@ uint16_t fp64d_to_fp16b(double a) {
 
     int result = (sign << 15) | (exponent << 10) | fraction;
     return result;
+}*/
+
+
+uint16_t fp64d_to_fp16b(double a) {
+    uint64_t value;
+    memcpy(&value, &a, sizeof(double));
+
+    uint16_t sign = (value >> 63) & 0x01;
+    uint16_t biased_exponent = (value >> 52) & 0x7FF;
+    uint16_t fraction = (value >> 46) & 0x3F;
+
+    uint16_t exponent = (biased_exponent - 1023 + 15) & 0x1F;
+
+    uint16_t result = (sign << 15) | (exponent << 10) | fraction;
+    return result;
+
 }
 
 
