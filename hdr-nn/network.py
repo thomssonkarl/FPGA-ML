@@ -199,20 +199,20 @@ class Network(object):
 
     def dumpWeightSplit(self):
         with open("weights_split.h", "w") as f:
-            f.write("uint16_t weights_hl[30][784] = {\n")
+            f.write("double weights_hl[30][784] = {\n")
             for weight_matrix in self.weights[0]:
                 f.write(f"        {'{'}")
                 for value in weight_matrix:
-                    f.write(f" {int_representation(fp64d_to_fp16b(value))},")
+                    f.write(f" {value},")
                 f.write(" },\n")
             f.write("};\n")
 
             weights_ol_dim = (30, 784)
-            f.write(f"uint16_t weights_ol[{weights_ol_dim[0]}][{weights_ol_dim[1]}] = {'{'}\n")
+            f.write(f"double weights_ol[{weights_ol_dim[0]}][{weights_ol_dim[1]}] = {'{'}\n")
             for weight_matrix in self.weights[1]:
                 f.write(f"        {'{'}")
                 for value in weight_matrix:
-                    f.write(f" {int_representation(fp64d_to_fp16b(value))},")
+                    f.write(f" {value},")
                 for _ in range(weights_ol_dim[1] - len(weight_matrix)):
                     f.write(" 0,")
                 f.write(" },\n")
@@ -240,18 +240,18 @@ class Network(object):
         a ='{'
         b='}'
         with open("biases_split.h", "w") as f:
-            f.write("uint16_t biases_hl[30][1] = {\n")
+            f.write("double biases_hl[30][1] = {\n")
             for bias_array in self.biases[0]:
                 for value in bias_array:
                     print(value)
-                    f.write(f"        {a+str(int_representation(fp64d_to_fp16b(value)))+b},\n")
+                    f.write(f"        {a+str(value)+b},\n")
             f.write("};\n")
 
-            f.write("uint16_t biases_ol[10][1] = {\n")
+            f.write("double biases_ol[10][1] = {\n")
             for bias_array in self.biases[1]:
                 for value in bias_array:
                     print(value)
-                    f.write(f"        {a+str(int_representation(fp64d_to_fp16b(value)))+b},\n")
+                    f.write(f"        {a+str(value)+b},\n")
             f.write("};\n")
 
 
