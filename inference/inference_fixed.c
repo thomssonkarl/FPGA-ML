@@ -7,7 +7,9 @@
 #define INPUT_SIZE 10000
 typedef double number_t;
 typedef int32_t fixed_point_t;
-#define FIXED_POINT_FRACTIONAL_BITS 16 
+// Around 12 bits works great for 1 digit integer part (which most weights and inputs are)
+// Around 10-8 bits seems to work better if integer part is 2 digits (not likely to happen in dot_product)
+#define FIXED_POINT_FRACTIONAL_BITS 12
 
 number_t sigmoid_single(number_t z) {
 	return 1.0 / (1.0 + exp(-z));
@@ -108,8 +110,76 @@ fixed_point_t mul_fixed(fixed_point_t a, fixed_point_t b) {
 }
 
 
+void test_fixed_arithmetic() {
+	double accepted_variance = 0.01;
+
+	double a_input = 8.120;
+	double b_input = 8.310;
+	double d_input = -6.312;
+	double e_input = -2.12;
+
+	fixed_point_t a = d2f(a_input);
+	fixed_point_t b = d2f(b_input);
+
+	fixed_point_t result_add = a + b;
+	double expected_add = a_input + b_input;
+	if (fabs(f2d(result_add) - expected_add) < accepted_variance) {
+		printf("Addition test passed.\n");
+
+	} else {
+		printf("Addition test failed. Produced: %f, Expected: %f\n", f2d(result_add), expected_add);
+
+	}
+
+	fixed_point_t result_sub = a - b;
+	double expected_sub = a_input - b_input;
+	if (fabs(f2d(result_sub) - expected_sub) < accepted_variance) {
+		printf("Subtraction test passed.\n");
+
+	} else {
+		printf("Subtraction test failed. Produced: %f, Expected: %f\n", f2d(result_sub), expected_sub);
+
+	}
+
+	fixed_point_t result_mul = mul_fixed(a, b);
+	double expected_mul = a_input * b_input;
+	if (fabs(f2d(result_mul) - expected_mul) < accepted_variance) {
+		printf("Multiplication test passed.\n");
+
+	} else {
+		printf("Multiplication test failed. Produced: %f, Expected: %f\n", f2d(result_mul), expected_mul);
+
+	}
+
+	fixed_point_t d = d2f(d_input);
+	fixed_point_t e = d2f(e_input);
+
+	fixed_point_t result_add_neg = d + e;
+	double expected_add_neg = d_input + e_input;
+	if (fabs(f2d(result_add_neg) - expected_add_neg) < accepted_variance) {
+		printf("Addition with negative numbers test passed.\n");
+
+	} else {
+		printf("Addition with negative numbers test failed. Produced: %f, Expected: %f\n", f2d(result_add_neg), expected_add_neg);
+
+	}
+
+	fixed_point_t result_mul_neg = mul_fixed(d, e);
+	double expected_mul_neg = d_input * e_input;
+	if (fabs(f2d(result_mul_neg) - expected_mul_neg) < accepted_variance) {
+		printf("Multiplication with negative numbers test passed.\n");
+
+	} else {
+		printf("Multiplication with negative numbers test failed. Produced: %f, Expected: %f\n", f2d(result_mul_neg), expected_mul_neg);
+
+	}
+
+}
+
 int main() {
     load_mnist();
-	evaluate();
+	//evaluate();
+	test_fixed_arithmetic();	
+
     return 0;
 }
