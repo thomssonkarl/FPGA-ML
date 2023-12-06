@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c11
+CFLAGS = -Wall -Wextra -g -std=c11
 LDFLAGS = -lm
 
 SOURCES = inference_double.c inference_fixed.c

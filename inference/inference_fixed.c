@@ -1,28 +1,28 @@
 #include "../mnistviewer/mnist.h"
 #include <stdint.h>
 #include <string.h>
-//#include "parameters_fixed.h"
 #include "parameters_split_double.h"
 #include <math.h>
 
-
+#define INPUT_SIZE 10000
 typedef double number_t;
+typedef int32_t fixed_point_t;
+#define FIXED_POINT_FRACTIONAL_BITS 16 
 
 number_t sigmoid_single(number_t z) {
 	return 1.0 / (1.0 + exp(-z));
 }
 
-
-void sigmoid(number_t vec[30], number_t result[30], int height) {
-	for(int i=0; i < height; i++) {
+void sigmoid(number_t vec[30], number_t result[30], size_t height) {
+	for(size_t i=0; i < height; i++) {
 		 result[i] = sigmoid_single(vec[i]);
 	}
 }
 
-void dot_product(number_t weights[30][784], number_t image[784], number_t result[30], int height, int size) {
+void dot_product(number_t weights[30][784], number_t image[784], number_t result[30], size_t height, size_t size) {
 	number_t dp = 0;
-	for (int i = 0; i < height; i++) {
-		for (int j = 0; j < size; j++) {
+	for (size_t i = 0; i < height; i++) {
+		for (size_t j = 0; j < size; j++) {
 			dp += weights[i][j] * image[j]; 
 		}
 		result[i] = dp;
@@ -30,22 +30,22 @@ void dot_product(number_t weights[30][784], number_t image[784], number_t result
 	}
 }
 
-void vector_add(number_t a[30], number_t b[30][1], number_t result[30], int height) {
-    for (int i = 0; i < height; i++) {
+void vector_add(number_t a[30], number_t b[30][1], number_t result[30], size_t height) {
+    for (size_t i = 0; i < height; i++) {
 		result[i] = b[i][0] + a[i];
     }
 }
 
 
-int argmax(const number_t arr[], int size) {
+size_t argmax(const number_t arr[], size_t size) {
 	if (size <= 0) {
 		fprintf(stderr, "Error: Invalid array size\n");
 		return -1;
 	}
 
-	int max_index = 0;
+	size_t max_index = 0;
 	number_t max_value = arr[0];
-	for (int i = 1; i < size; i++) {
+	for (size_t i = 1; i < size; i++) {
 		if (arr[i] > max_value) {
 			max_value = arr[i];
 			max_index = i;
@@ -54,76 +54,59 @@ int argmax(const number_t arr[], int size) {
 	return max_index;
 }
 
-int feed_forward(number_t input[784]) {
+size_t feed_forward(number_t input[784]) {
 	number_t res[30] = {0};
 	number_t add_res[30] = {0};
 	number_t dp_res[30] = {0};
-	// Hidden layer (height is 30)
-	const int height_hl = 30;
-	dot_product(weights_hl, input, dp_res, height_hl, 784);
+
+	// Hidden layer
+	const size_t height_hl = 30;
+	const size_t width_hl = 784;
+	dot_product(weights_hl, input, dp_res, height_hl, width_hl);
 	vector_add(dp_res, biases_hl, add_res, height_hl);
 	sigmoid(add_res, res, height_hl);
 
-	// Output layer (height is 10)
-	const int height_ol = 10;
-	dot_product(weights_ol, input, dp_res, height_ol, 30);
+	// Output layer
+	const size_t height_ol = 10;
+	const size_t width_ol = 30;
+	dot_product(weights_ol, res, dp_res, height_ol, width_ol);
 	vector_add(dp_res, biases_ol, add_res, height_ol);
 	sigmoid(add_res, res, height_ol);
-    	
-	int output = argmax(res, height_ol);
-	return output;
+	
+	return argmax(res, height_ol);
 }
 
 
 void evaluate() {
-	int actual, output, counter = 0;
-	for (int i = 0; i < 10000; i++) {
+	size_t actual, output, counter = 0;
+
+	for (int i = 0; i < INPUT_SIZE; i++) {
 		actual = test_label[i];
     	output = feed_forward(test_image[i]);
         if (output == actual) {
 			counter++;
 		}
 	}
-	printf("Accuracy: %d/10000\n", counter);
+	printf("Accuracy: %zu/%d\n", counter, INPUT_SIZE);
 }
 
 
-
-/*
-void print_colored_pixel(double value) {
-	int color_code = (int)(value * 255);
-	printf("\x1b[48;2;%d;%d;%dm  ", color_code, color_code, color_code);
+double f2d(fixed_point_t input) {
+	return ((double)input / (double)(1 << FIXED_POINT_FRACTIONAL_BITS));
 }
 
-void display_image(double *image) {
-	for (int i = 0; i < 28; i++) {
-		for (int j = 0; j < 28; j++) {
-			print_colored_pixel(image[i * 28 + j]);
-		}
-		printf("\n");
-	}
+
+fixed_point_t d2f(double input) {
+	return (fixed_point_t)(input * (1 << FIXED_POINT_FRACTIONAL_BITS));
 }
-void evaluate_display() {
-	int quit = 0;
-	int i = 0;
-	int output = 0;
-	char response;
-	
-	while(!quit) {
-		output = feed_forward(test_image[i]);
-		printf("Current image index: %d, Output of NN: %d, Actual label: %d\n", i, output, test_label[i]);
-		display_image(test_image[i]);
-		printf("Show next image? (y/n)");
-		scanf(" %c", &response);
-		if (response == 'n' || response == 'N')
-			quit = 1;
-		i++;
-		if(i >= 10000) {
-			printf("End of images\n");
-			break;
-		}
-	}
-}*/
+
+
+fixed_point_t mul_fixed(fixed_point_t a, fixed_point_t b) {
+	int32_t result = (int32_t)a * b;
+	result >>= FIXED_POINT_FRACTIONAL_BITS;
+	return (fixed_point_t)result;
+}
+
 
 int main() {
     load_mnist();

@@ -40,7 +40,7 @@ unsigned char test_label_char[NUM_TEST][1];
 
 double train_image[NUM_TRAIN][SIZE];
 double test_image[NUM_TEST][SIZE];
-uint16_t test_image_fixed[NUM_TEST][SIZE];
+int test_image_fixed[NUM_TEST][SIZE];
 
 int  train_label[NUM_TRAIN];
 int test_label[NUM_TEST];
@@ -197,7 +197,7 @@ void save_mnist_pgm(double data_image[][SIZE], int index)
 
     save_image(n, "");
 }
-
+/*
 int double_to_fixed(double x) {
     double scale_factor = 10000.0;
     return (int) (x * scale_factor);
@@ -209,75 +209,10 @@ double fixed_to_double(int x) {
 }
 
 
-/*double fp16b_to_fp64d(uint16_t a) {
-
-    uint16_t sign = (a >> 15) & 0x01;
-    uint16_t exponent = (a >> 10) & 0x1F;
-    uint16_t fraction = a & 0x03FF;
-
-    int32_t biased_exponent = exponent - 15 + 1023;
-    uint64_t result = ((uint64_t)sign << 63) | ((uint64_t)biased_exponent << 52) | ((uint64_t)fraction << 42);
-
-    double final_result;
-    memcpy(&final_result, &result, sizeof(double));
-
-    return final_result;
-}*/
-
-double fp16b_to_fp64d(uint16_t a) {
-    uint16_t sign = (a >> 15) & 0x01;
-    uint16_t exponent = (a >> 10) & 0x1F;
-    uint16_t fraction = a & 0x03FF;
-
-    int32_t biased_exponent = exponent - 15 + 1023;
-    uint64_t result = ((uint64_t)sign << 63) | ((uint64_t)biased_exponent << 52) | ((uint64_t)fraction << 42);
-
-    double final_result;
-    memcpy(&final_result, &result, sizeof(double));
-
-    return final_result;
-
-}
-
-
-
-/*
-uint16_t fp64d_to_fp16b(double a) {
-    uint64_t value;
-    memcpy(&value, &a, sizeof(double));
-
-    uint16_t sign = (value >> 63) & 0x01;
-    uint16_t biased_exponent = (value >> 52) & 0x7FF;
-    uint16_t fraction = (value >> 42) & 0x03FF;
-
-    uint16_t exponent = (biased_exponent - 1023 + 15) & 0x1F;
-
-    int result = (sign << 15) | (exponent << 10) | fraction;
-    return result;
-}*/
-
-
-uint16_t fp64d_to_fp16b(double a) {
-    uint64_t value;
-    memcpy(&value, &a, sizeof(double));
-
-    uint16_t sign = (value >> 63) & 0x01;
-    uint16_t biased_exponent = (value >> 52) & 0x7FF;
-    uint16_t fraction = (value >> 46) & 0x3F;
-
-    uint16_t exponent = (biased_exponent - 1023 + 15) & 0x1F;
-
-    uint16_t result = (sign << 15) | (exponent << 10) | fraction;
-    return result;
-
-}
-
-
-
 void images_to_fixed(double images[10000][784], uint16_t images_write[10000][784]) {
     for (int image_no = 0; image_no < 10000; image_no++) {
         for (int pixel = 0; pixel < 784; pixel++) {
             images_write[image_no][pixel] = fp64d_to_fp16b(images[image_no][pixel]);
         }
     }
-}
+}*/
