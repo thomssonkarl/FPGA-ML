@@ -26,6 +26,9 @@ https://github.com/takafumihoriuchi/MNIST_for_C
 #define MAX_BRIGHTNESS 255
 #define MAX_FILENAME 256
 #define MAX_NUM_OF_IMAGES 1
+#define FIXED_POINT_FRACTIONAL_BITS 8
+
+typedef int32_t fixed_point_t;
 
 unsigned char image[MAX_NUM_OF_IMAGES][MAX_IMAGESIZE][MAX_IMAGESIZE];
 int width[MAX_NUM_OF_IMAGES], height[MAX_NUM_OF_IMAGES];
@@ -40,7 +43,7 @@ unsigned char test_label_char[NUM_TEST][1];
 
 double train_image[NUM_TRAIN][SIZE];
 double test_image[NUM_TEST][SIZE];
-int test_image_fixed[NUM_TEST][SIZE];
+fixed_point_t test_image_fixed[NUM_TEST][SIZE];
 
 int  train_label[NUM_TRAIN];
 int test_label[NUM_TEST];
@@ -197,22 +200,28 @@ void save_mnist_pgm(double data_image[][SIZE], int index)
 
     save_image(n, "");
 }
-/*
-int double_to_fixed(double x) {
-    double scale_factor = 10000.0;
-    return (int) (x * scale_factor);
-}
 
-double fixed_to_double(int x) {
-    double scale_factor = 10000.0;
-    return (double) (x / scale_factor);
+
+double f2d(fixed_point_t input) {
+    return ((double)input / (double)(1 << FIXED_POINT_FRACTIONAL_BITS));
 }
 
 
-void images_to_fixed(double images[10000][784], uint16_t images_write[10000][784]) {
+fixed_point_t d2f(double input) {
+    return (fixed_point_t)(input * (1 << FIXED_POINT_FRACTIONAL_BITS));
+}
+
+
+fixed_point_t mul_fixed(fixed_point_t a, fixed_point_t b) {
+    int32_t result = (int32_t)a * b;
+    result >>= FIXED_POINT_FRACTIONAL_BITS;
+    return (fixed_point_t)result;
+}
+
+void images_to_fixed(double images[10000][784], fixed_point_t images_write[10000][784]) {
     for (int image_no = 0; image_no < 10000; image_no++) {
         for (int pixel = 0; pixel < 784; pixel++) {
-            images_write[image_no][pixel] = fp64d_to_fp16b(images[image_no][pixel]);
+            images_write[image_no][pixel] = d2f(images[image_no][pixel]);
         }
     }
-}*/
+}
