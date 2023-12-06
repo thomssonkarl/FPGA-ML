@@ -11,14 +11,11 @@ def fp16b_to_fp64d(__a):
     float16_view = np.uint16(int(binary_str, 2)).view(np.float16)
     return float16_view.item()
 
-value_to_test = 0.5 
+def d2f(input):
+    FIXED_POINT_FRACTIONAL_BITS = 16
+    return int(input * (1 << FIXED_POINT_FRACTIONAL_BITS))
 
-int_rep = int_representation(fp64d_to_fp16b(value_to_test))
-
-print(int_rep)
-
-decimal_a = fp16b_to_fp64d(int_representation(fp64d_to_fp16b(value_to_test)))
-
-# this should output ~0.35
-print(decimal_a)
+double_input = -3.14
+fixed_point_result = d2f(double_input)
+print(fixed_point_result)
 

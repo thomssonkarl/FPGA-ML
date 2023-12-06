@@ -17,7 +17,6 @@
 
 # ----------------------
 # - read the input data:
-
 import mnist_loader
 training_data, validation_data, test_data = mnist_loader.load_data_wrapper()
 # import pudb; pu.db
@@ -35,8 +34,9 @@ import pudb
 net = network.Network([784, 30, 10])
 net.SGD(training_data, 30, 10, 3, test_data=test_data)
 
-net.dumpWeightSplit()
-net.dumpBiasSplit()
+#net.dumpWeight()
+#net.dumpBias()
+net.dumpParameters()
 
 #pu.db
 #net.evaluate(training_data)

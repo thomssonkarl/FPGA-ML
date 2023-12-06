@@ -165,54 +165,21 @@ class Network(object):
         return (output_activations-y)
 
     def dumpWeight(self):
-        with open("weights.h", "w") as f:
-            f.write("int **weights[2] = {\n")
-            for weight_matrix in self.weights:
-                f.write(f"(int *[{len(weight_matrix)}])    {'{'}")
-                f.write("\n")
-                for row in weight_matrix:
-                    f.write(f"(int [{len(row)}])        {'{'}")
-                    for value in row:
-                        f.write(f" {double_to_fixed(value)},")
-                    f.write(" },\n")
-                f.write("    },\n")
-            f.write("};\n")
-
-    def dumpWeightSplit(self):
         with open("weights_split.h", "w") as f:
-            f.write("uint16_t weights_hl[30][784] = {\n")
+            f.write("int32_t weights_hl[30][784] = {\n")
             for weight_matrix in self.weights[0]:
                 f.write(f"        {'{'}")
                 for value in weight_matrix:
-                    f.write(f" {int_representation(fp64d_to_fp16b(value))},")
-                f.write(" },\n")
-            f.write("};\n")
-
-            f.write("uint16_t weights_ol[10][30] = {\n")
-            for weight_matrix in self.weights[1]:
-                f.write(f"        {'{'}")
-                for value in weight_matrix:
-                    f.write(f" {int_representation(fp64d_to_fp16b(value))},")
-                f.write(" },\n")
-            f.write("};\n")
-
-
-    def dumpWeightSplit(self):
-        with open("weights_split.h", "w") as f:
-            f.write("double weights_hl[30][784] = {\n")
-            for weight_matrix in self.weights[0]:
-                f.write(f"        {'{'}")
-                for value in weight_matrix:
-                    f.write(f" {value},")
+                    f.write(f" {d2f(value)},")
                 f.write(" },\n")
             f.write("};\n")
 
             weights_ol_dim = (30, 784)
-            f.write(f"double weights_ol[{weights_ol_dim[0]}][{weights_ol_dim[1]}] = {'{'}\n")
+            f.write(f"int32_t weights_ol[{weights_ol_dim[0]}][{weights_ol_dim[1]}] = {'{'}\n")
             for weight_matrix in self.weights[1]:
                 f.write(f"        {'{'}")
                 for value in weight_matrix:
-                    f.write(f" {value},")
+                    f.write(f" {d2f(value)},")
                 for _ in range(weights_ol_dim[1] - len(weight_matrix)):
                     f.write(" 0,")
                 f.write(" },\n")
@@ -220,41 +187,29 @@ class Network(object):
                 f.write(f"        {'{' + ' 0,' * weights_ol_dim[1]}{'}'},\n")
             f.write("};\n")
 
-
-
-
     def dumpBias(self):
         a ='{'
         b='}'
-        with open("biases.h", "w") as f:
-            f.write("int **biases[2] = {\n")
-            for bias_array in self.biases:
-                f.write(f"    (int *[{len(bias_array)}]) {'{'}")
-                f.write("\n")
-                for value in bias_array:
-                    f.write(f"(int [1])        {a+str(double_to_fixed(value[0]))+b},\n")
-                f.write("    },\n")
-            f.write("};\n")
-
-    def dumpBiasSplit(self):
-        a ='{'
-        b='}'
         with open("biases_split.h", "w") as f:
-            f.write("double biases_hl[30][1] = {\n")
+            f.write("int32_t biases_hl[30][1] = {\n")
             for bias_array in self.biases[0]:
                 for value in bias_array:
-                    print(value)
-                    f.write(f"        {a+str(value)+b},\n")
+                    f.write(f"        {a+str(d2f(value))+b},\n")
             f.write("};\n")
 
-            f.write("double biases_ol[10][1] = {\n")
+            f.write("int32_t biases_ol[30][1] = {\n")
             for bias_array in self.biases[1]:
                 for value in bias_array:
-                    print(value)
-                    f.write(f"        {a+str(value)+b},\n")
+                    f.write(f"        {a+str(d2f(value))+b},\n")
+
+            for _ in range(len(self.biases[1]), 30):
+                f.write(f"        {a + str(0) + b},\n")
+
             f.write("};\n")
 
-
+    def dumpParameters(self):
+        self.dumpWeight()
+        self.dumpBias()
 
 
 #### Miscellaneous functions
@@ -266,16 +221,7 @@ def sigmoid_prime(z):
     """Derivative of the sigmoid function."""
     return sigmoid(z)*(1-sigmoid(z))
 
-def fp64d_to_fp16b(a):
-    return bin(np.float16(a).view('H'))[2:].zfill(16)
 
-def int_representation(__a):
-    return int(__a, 2)
-
-def fp16b_to_fp64d(__a):
-    binary_str = format(__a, '016b')  # Ensure 16 bits in the binary representation
-    float16_view = np.uint16(int(binary_str, 2)).view(np.float16)
-    return float16_view.item()
-
-def double_to_fixed(x):
-        return int(x * 10000)
+def d2f(input):
+    FIXED_POINT_FRACTIONAL_BITS = 12
+    return int(input * (1 << FIXED_POINT_FRACTIONAL_BITS))
