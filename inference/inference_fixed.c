@@ -1,8 +1,10 @@
 #include "../mnistviewer/mnist.h"
+#include "../mnistviewer/test_data.h"
 #include <stdint.h>
 #include <string.h>
 #include "parameters_fixed.h"
 #include <math.h>
+#include "dot_product.h"
 
 #define INPUT_SIZE 10000
 
@@ -15,20 +17,6 @@ fixed_point_t sigmoid_single(fixed_point_t z) {
 void sigmoid(fixed_point_t vec[30], fixed_point_t result[30], size_t height) {
 	for(size_t i=0; i < height; i++) {
 		 result[i] = sigmoid_single(vec[i]);
-	}
-}
-
-void dot_product(fixed_point_t weights[30][784], fixed_point_t image[784], fixed_point_t result[30], size_t height, size_t size) {
-	fixed_point_t dp, partial = 0;
-	uint16_t FRACTIONAL_BITS = 8;
-	for (size_t i = 0; i < height; i++) {
-		for (size_t j = 0; j < size; j++) {
-			partial = weights[i][j]*image[j];
-			partial >>= FRACTIONAL_BITS; 
-			dp += (fixed_point_t) partial;
-		}
-		result[i] = dp;
-		dp = 0;
 	}
 }
 
@@ -83,7 +71,7 @@ void evaluate() {
 	size_t actual, output, counter = 0;
 
 	for (int i = 0; i < INPUT_SIZE; i++) {
-		actual = test_label[i];
+		actual = test_label_header[i];
     	output = feed_forward(test_image_fixed[i]);
         if (output == actual) {
 			counter++;
@@ -159,8 +147,7 @@ void test_fixed_arithmetic() {
 }
 
 int main() {
-    load_mnist();
-	images_to_fixed(test_image, test_image_fixed);
+	images_to_fixed(test_image_header, test_image_fixed);
 	evaluate();
 
     return 0;

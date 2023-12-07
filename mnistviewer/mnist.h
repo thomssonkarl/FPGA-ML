@@ -9,6 +9,7 @@ https://github.com/takafumihoriuchi/MNIST_for_C
 #include <fcntl.h>
 #include <string.h>
 #include <stdint.h>
+#include "../inference/dot_product.h"
 
 // set appropriate path for data
 #define TRAIN_IMAGE "./data/train-images.idx3-ubyte"
@@ -27,8 +28,6 @@ https://github.com/takafumihoriuchi/MNIST_for_C
 #define MAX_FILENAME 256
 #define MAX_NUM_OF_IMAGES 1
 #define FIXED_POINT_FRACTIONAL_BITS 8
-
-typedef int32_t fixed_point_t;
 
 unsigned char image[MAX_NUM_OF_IMAGES][MAX_IMAGESIZE][MAX_IMAGESIZE];
 int width[MAX_NUM_OF_IMAGES], height[MAX_NUM_OF_IMAGES];
