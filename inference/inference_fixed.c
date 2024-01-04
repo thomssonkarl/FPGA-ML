@@ -146,9 +146,47 @@ void test_fixed_arithmetic() {
 
 }
 
+void print_colored_pixel(fixed_point_t value) {
+    int color_code = (int)(f2d(value) * 255);
+    printf("\x1b[48;2;%d;%d;%dm  ", color_code, color_code, color_code);
+}
+
+void display_image(fixed_point_t *image) {
+    for (int i = 0; i < 28; i++) {
+        for (int j = 0; j < 28; j++) {
+            print_colored_pixel(image[i * 28 + j]);
+        }
+        printf("\n");
+    }
+}
+
+void evaluate_display() {
+    int quit = 0;
+    int i = 0;
+    size_t output = 0;
+    char response;
+    
+    while(!quit) {
+        output = feed_forward(test_image_fixed[i]);
+        printf("Current image index: %d, Output of NN: %ld, Actual label: %d\n", i, output, test_label_header[i]);
+        display_image(test_image_fixed[i]);
+        printf("Show next image? (y/n)");
+        scanf(" %c", &response);
+        if (response == 'n' || response == 'N')
+            quit = 1;
+        i++;
+        if(i >= 10000) {
+            printf("End of images\n");
+            break;
+        }
+    }
+}
+
+
 int main() {
 	images_to_fixed(test_image_header, test_image_fixed);
 	evaluate();
+    evaluate_display();
 
     return 0;
 }
